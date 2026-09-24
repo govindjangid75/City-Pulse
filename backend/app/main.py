@@ -61,7 +61,6 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix=settings.API_V1_STR)
-app.include_router(auth_router, prefix=settings.API_V1_STR)
 
 @app.websocket("/ws/zones")
 async def websocket_endpoint(websocket: WebSocket):
