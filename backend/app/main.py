@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import init_db, get_db_connection
 from .api import router, ws_manager
+from .api.auth import router as auth_router
 from .services.ingestion import ingestion_manager
 
 async def periodic_ingestion_worker():
@@ -60,6 +61,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix=settings.API_V1_STR)
+app.include_router(auth_router, prefix=settings.API_V1_STR)
 
 @app.websocket("/ws/zones")
 async def websocket_endpoint(websocket: WebSocket):
