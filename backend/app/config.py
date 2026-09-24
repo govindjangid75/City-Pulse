@@ -2,11 +2,12 @@
 Configuration settings for CityPulse.
 Loads environment variables and sets defaults for zones, rolling windows, and data feeds.
 """
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "CityPulse"
+    ENVIRONMENT: str = "development"
     API_V1_STR: str = "/api/v1"
     DATABASE_URL: str = "sqlite:///./citypulse.db"
     
@@ -17,11 +18,23 @@ class Settings(BaseSettings):
     ROLLING_WINDOW_MINUTES: int = 30
     CORRELATION_THRESHOLD_COUNT: int = 3
     
+    # Ingestion poller schedules (in seconds)
+    POLL_WEATHER_SECONDS: int = 3600
+    POLL_TRANSIT_SECONDS: int = 180
+    POLL_311_SECONDS: int = 60
+    
     # LLM Settings (optional enhancement)
     USE_LLM_SUMMARY: bool = False
     LLM_API_KEY: str = ""
+    LLM_PROVIDER: str = "gemini"
+    
+    # Security & CORS
+    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "*"]
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=(".env", "../.env"),
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 settings = Settings()

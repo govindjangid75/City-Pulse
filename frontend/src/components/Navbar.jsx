@@ -1,5 +1,8 @@
-import React from 'react'
-import { Activity, Radio, RefreshCw, Play, RotateCcw, ShieldAlert, Cpu } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { 
+  Activity, Radio, RefreshCw, Play, RotateCcw, ShieldAlert, 
+  Cpu, User, LogIn, LogOut, ChevronDown, ShieldCheck, Sparkles, MapPin
+} from 'lucide-react'
 
 export default function Navbar({ 
   wsStatus, 
@@ -8,8 +11,38 @@ export default function Navbar({
   onResetDatabase, 
   onRefresh, 
   alertCount,
-  onOpenSimulator
+  onOpenSimulator,
+  currentUser,
+  onOpenAuth,
+  onSignOut
 }) {
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case 'responder':
+        return { label: '🚨 First Responder', bg: 'bg-rose-500/15 text-rose-300 border-rose-500/30' }
+      case 'analyst':
+        return { label: '🏛️ City Analyst', bg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30' }
+      default:
+        return { label: '👤 Citizen', bg: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' }
+    }
+  }
+
+  const roleInfo = currentUser ? getRoleBadge(currentUser.role) : null
+
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 py-3.5 transition-all">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
@@ -86,8 +119,84 @@ export default function Navbar({
           >
             <RotateCcw className="w-4 h-4" />
           </button>
+
+          {/* User Auth Section */}
+          <div className="relative" ref={dropdownRef}>
+            {currentUser ? (
+              <div>
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 hover:border-slate-600 transition"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-slate-950 font-bold text-xs">
+                    {currentUser.full_name ? currentUser.full_name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                  <div className="text-left hidden md:block">
+                    <div className="text-xs font-semibold text-slate-200 leading-tight">
+                      {currentUser.full_name}
+                    </div>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                {/* Profile Dropdown */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl shadow-slate-950/80 p-3 z-50 animate-in fade-in">
+                    <div className="p-2 border-b border-slate-800/80 mb-2">
+                      <div className="font-semibold text-sm text-white">{currentUser.full_name}</div>
+                      <div className="text-xs text-slate-400 font-mono truncate">{currentUser.email}</div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${roleInfo?.bg}`}>
+                          {roleInfo?.label}
+                        </span>
+                        {currentUser.primary_zone && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1">
+                            <MapPin className="w-2.5 h-2.5 text-emerald-400" />
+                            {currentUser.primary_zone}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); onOpenAuth('signin'); }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-300 hover:text-white hover:bg-slate-800/70 transition flex items-center gap-2"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Switch Persona / Login</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setProfileDropdownOpen(false); onSignOut(); }}
+                      className="w-full text-left px-3 py-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 transition flex items-center gap-2 mt-1"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onOpenAuth('signin')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-sm shadow-emerald-500/20 active:scale-95 transition"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </button>
+                <button
+                  onClick={() => onOpenAuth('signup')}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 transition"
+                >
+                  <span>Sign Up</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
   )
 }
+

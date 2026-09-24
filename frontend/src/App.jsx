@@ -7,6 +7,8 @@ import ZoneDetailModal from './components/ZoneDetailModal'
 import FeedHealthIndicator from './components/FeedHealthIndicator'
 import HistoricalReplayBar from './components/HistoricalReplayBar'
 import SimulationPanel from './components/SimulationPanel'
+import AuthModal from './components/AuthModal'
+import AuthPage from './components/AuthPage'
 import { 
   fetchAllZones, fetchSystemHealth, toggleFeedStatus, 
   resetSimulationDatabase, fetchHistoryTimeline 
@@ -21,6 +23,19 @@ export default function App() {
   const [wsStatus, setWsStatus] = useState('connecting')
   const [windowMinutes, setWindowMinutes] = useState(30)
   
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('citypulse_user')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authMode, setAuthMode] = useState('signin')
+  const [showFullAuthPage, setShowFullAuthPage] = useState(false)
+
   // Historical Replay State
   const [replayMode, setReplayMode] = useState(false)
   const [replayTimestamp, setReplayTimestamp] = useState(null)
@@ -145,6 +160,20 @@ export default function App() {
   // Check if any feed is degraded
   const degradedFeeds = Object.entries(feedHealth).filter(([_, status]) => status !== 'ok')
 
+  // Full-page authentication view
+  if (showFullAuthPage) {
+    return (
+      <AuthPage 
+        initialMode={authMode}
+        onBackToDashboard={() => setShowFullAuthPage(false)}
+        onAuthSuccess={(user, token) => {
+          setCurrentUser(user)
+          setShowFullAuthPage(false)
+        }}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
       {/* Top Navigation */}
@@ -155,7 +184,39 @@ export default function App() {
         onResetDatabase={handleResetDatabase}
         onRefresh={() => loadData()}
         onOpenSimulator={() => setIsSimulatorOpen(true)}
+        currentUser={currentUser}
+        onOpenAuth={(mode) => {
+          setAuthMode(mode)
+          setIsAuthModalOpen(true)
+        }}
+        onSignOut={() => {
+          localStorage.removeItem('citypulse_token')
+          localStorage.removeItem('citypulse_user')
+          setCurrentUser(null)
+        }}
       />
+
+      {/* Personalized Welcome Banner if User is Authenticated */}
+      {currentUser && (
+        <div className="bg-gradient-to-r from-emerald-950/40 via-slate-900 to-indigo-950/40 border-b border-slate-800/80 px-4 sm:px-6 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-slate-300">
+                Welcome back, <strong className="text-white font-semibold">{currentUser.full_name}</strong>
+                {currentUser.role === 'responder' && ' • First Responder Priority Dispatch Feed Active'}
+                {currentUser.role === 'analyst' && ' • Municipal Cross-Feed Intelligence Active'}
+                {currentUser.role === 'citizen' && ' • Hyperlocal Resident Watch Active'}
+              </span>
+            </div>
+            {currentUser.primary_zone && (
+              <span className="text-emerald-400 font-mono text-[11px] hidden sm:inline bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                Primary Monitored Sector: {currentUser.primary_zone.toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Alert Header */}
       <AlertBanner 
@@ -277,6 +338,17 @@ export default function App() {
           onEventInjected={() => loadData()}
         />
       )}
+
+      {/* Auth Modal (Sign In & Sign Up) */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode={authMode}
+        onAuthSuccess={(user, token) => {
+          setCurrentUser(user)
+          setIsAuthModalOpen(false)
+        }}
+      />
     </div>
   )
 }
