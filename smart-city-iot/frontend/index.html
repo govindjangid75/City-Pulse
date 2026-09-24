@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartCity IoT — Global Analytics</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <div class="brand-name">SmartCity</div>
+      <div class="brand-sub">Global IoT Analytics</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Dashboard</div>
+    <a class="nav-item active" data-page="overview">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </a>
+    <a class="nav-item" data-page="traffic">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Traffic
+    </a>
+    <a class="nav-item" data-page="energy">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Energy
+    </a>
+    <a class="nav-item" data-page="air">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+      Air Quality
+    </a>
+    <a class="nav-item" data-page="water">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      Water
+    </a>
+    <div class="nav-group-label">Analytics</div>
+    <a class="nav-item" data-page="forecast">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Forecasting
+      <span class="nav-badge nav-badge-ai">AI</span>
+    </a>
+    <a class="nav-item" data-page="alerts">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alerts
+      <span class="nav-badge" id="alertBadge" style="display:none">0</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="locate-row">
+      <button id="locateBtn" class="locate-btn-full" title="Auto-detect my location">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Detect My Location
+      </button>
+    </div>
+
+    <div class="geo-section">
+      <span class="footer-label">🌍 Country</span>
+      <select id="selCountry" class="footer-select">
+        <option value="">— Select Country —</option>
+      </select>
+    </div>
+    <div class="geo-section">
+      <span class="footer-label">🗺️ State / Province</span>
+      <select id="selState" class="footer-select" disabled>
+        <option value="">— Select State —</option>
+      </select>
+    </div>
+    <div class="geo-section">
+      <span class="footer-label">🏙️ City</span>
+      <select id="selCity" class="footer-select" disabled>
+        <option value="">— Select City —</option>
+      </select>
+    </div>
+    <div class="geo-section">
+      <span class="footer-label">📍 Zone / Area</span>
+      <select id="selArea" class="footer-select" disabled>
+        <option value="">All Zones</option>
+      </select>
+    </div>
+
+    <div class="live-status">
+      <span class="live-dot"></span>
+      <span class="live-text">Live · updating every 2s</span>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-breadcrumb">
+        <span id="breadcrumbGeo" class="geo-breadcrumb">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span id="breadcrumbText">Select a location</span>
+        </span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="page-title" id="pageTitle">Overview</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="ts-chip" id="lastUpdated">--:--:--</div>
+      <div class="range-tabs">
+        <button class="range-tab active" data-days="7">7D</button>
+        <button class="range-tab" data-days="30">30D</button>
+        <button class="range-tab" data-days="90">90D</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Overview ── -->
+  <div class="page active" id="page-overview">
+    <div id="weatherBanner" class="weather-banner">
+      <div class="wb-left">
+        <div class="wb-emoji" id="wbEmoji">🌤️</div>
+        <div>
+          <div class="wb-city" id="wbCity">Loading...</div>
+          <div class="wb-desc" id="wbDesc">Fetching live weather...</div>
+        </div>
+      </div>
+      <div class="wb-stats">
+        <div class="wb-stat"><span class="wb-val" id="wbTemp">--</span><span class="wb-unit">°F</span></div>
+        <div class="wb-div"></div>
+        <div class="wb-stat"><span class="wb-val" id="wbHum">--</span><span class="wb-unit">% hum</span></div>
+        <div class="wb-div"></div>
+        <div class="wb-stat"><span class="wb-val" id="wbWind">--</span><span class="wb-unit">mph</span></div>
+        <div class="wb-div"></div>
+        <div class="wb-stat"><span class="wb-val" id="wbUV">--</span><span class="wb-unit">UV</span></div>
+        <div class="wb-div"></div>
+        <div class="wb-stat">
+          <span class="wb-val aqi-val" id="wbAqi">--</span>
+          <span class="wb-unit">AQI · <span id="wbAqiCat">--</span></span>
+        </div>
+        <div class="wb-div"></div>
+        <div class="wb-stat"><span class="wb-val" id="wbPm25">--</span><span class="wb-unit">PM2.5</span></div>
+      </div>
+      <div class="wb-advice" id="wbAdvice"></div>
+    </div>
+
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="alert-bar" id="alertBar"></div>
+
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Live Traffic — Vehicle Count</span>
+          <div class="card-meta">
+            <span class="chip chip-live"><span class="live-dot"></span>Streaming</span>
+            <span class="chip chip-blue" id="badge-ov-traffic">--</span>
+          </div>
+        </div>
+        <canvas id="liveTraffic"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Energy by Zone</span><span class="chip chip-blue">kWh avg</span></div>
+        <canvas id="energyBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Air Quality by Zone</span><span class="chip chip-blue">AQI</span></div>
+        <canvas id="aqiBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Traffic ── -->
+  <div class="page" id="page-traffic">
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Live Vehicle Count</span>
+          <div class="card-meta">
+            <span class="chip chip-live"><span class="live-dot"></span>Streaming</span>
+            <span class="chip chip-blue" id="badge-traffic">--</span>
+          </div>
+        </div>
+        <canvas id="trafficLive"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Speed by Zone</span><span class="chip chip-blue">km/h</span></div>
+        <canvas id="trafficSpeedBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">24h Traffic Pattern</span><span class="chip chip-blue">avg</span></div>
+        <canvas id="trafficHourly"></canvas>
+      </div>
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Week-over-Week Traffic</span>
+          <span class="chip chip-purple" id="trafficWowBadge">-- vs last week</span>
+        </div>
+        <canvas id="trafficCompare"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Energy ── -->
+  <div class="page" id="page-energy">
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Live Energy Consumption</span>
+          <div class="card-meta">
+            <span class="chip chip-live"><span class="live-dot"></span>Streaming</span>
+            <span class="chip chip-orange" id="badge-energy">--</span>
+          </div>
+        </div>
+        <canvas id="energyLive"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Consumption by Zone</span><span class="chip chip-orange">kWh</span></div>
+        <canvas id="energyZoneBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Solar Coverage</span><span class="chip chip-green">% of demand</span></div>
+        <canvas id="solarBar"></canvas>
+      </div>
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Week-over-Week Energy</span>
+          <span class="chip chip-purple" id="energyWowBadge">-- vs last week</span>
+        </div>
+        <canvas id="energyCompare"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Air Quality ── -->
+  <div class="page" id="page-air">
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Live AQI Stream</span>
+          <div class="card-meta">
+            <span class="chip chip-live"><span class="live-dot"></span>Streaming</span>
+            <span class="chip chip-blue" id="badge-air">--</span>
+          </div>
+        </div>
+        <canvas id="airLive"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">AQI by Zone</span></div>
+        <canvas id="airZoneBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">PM2.5 by Zone</span><span class="chip chip-blue">μg/m³</span></div>
+        <canvas id="pm25Bar"></canvas>
+      </div>
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Week-over-Week AQI</span>
+          <span class="chip chip-purple" id="airWowBadge">-- vs last week</span>
+        </div>
+        <canvas id="airCompare"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Water ── -->
+  <div class="page" id="page-water">
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Live Water Usage</span>
+          <div class="card-meta">
+            <span class="chip chip-live"><span class="live-dot"></span>Streaming</span>
+            <span class="chip chip-cyan" id="badge-water">--</span>
+          </div>
+        </div>
+        <canvas id="waterLive"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Usage by Zone</span><span class="chip chip-cyan">L/hr</span></div>
+        <canvas id="waterZoneBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Pipe Leak Risk</span><span class="chip chip-blue">% high risk</span></div>
+        <canvas id="leakBar"></canvas>
+      </div>
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Week-over-Week Water Usage</span>
+          <span class="chip chip-purple" id="waterWowBadge">-- vs last week</span>
+        </div>
+        <canvas id="waterCompare"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Forecast ── -->
+  <div class="page" id="page-forecast">
+    <div class="grid-2">
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">ARIMA vs Prophet — 24h Energy Forecast</span>
+          <div class="card-meta" id="mapeChips"></div>
+          <span class="chip chip-blue" id="badge-forecast">--</span>
+        </div>
+        <div id="peakAlert" class="peak-alert" style="display:none"></div>
+        <canvas id="forecastChart"></canvas>
+      </div>
+      <div class="card col-2">
+        <div class="card-header">
+          <span class="card-title">Anomaly Detection — Isolation Forest</span>
+          <span class="chip chip-blue" id="badge-anomaly">--</span>
+          <span class="chip chip-orange" id="anomalyMethod">method: --</span>
+        </div>
+        <canvas id="anomalyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Alerts ── -->
+  <div class="page" id="page-alerts">
+    <div class="alerts-header" id="alertsHeader"></div>
+    <div id="alertPanel" class="alert-panel">
+      <div class="alert-skeleton">Loading alerts...</div>
+    </div>
+  </div>
+</div>
+
+<div class="loader-wrap" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-label">Loading sensor data...</div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/charts.js"></script>
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
