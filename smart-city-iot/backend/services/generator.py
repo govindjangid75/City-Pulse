@@ -118,5 +118,4 @@ def generate_all(data_dir: str, city: str = "New York"):
                          "usage_liters":round(usage[i],1),
                          "pressure_bar":round(pressure[i],2),
                          "pipe_leak_risk":round(leak[i],3)})
-    pd.DataFrame(rows).to_csv(f"{data_dir}/water.csv", index=False)
-    print(f"✅ Generated data for {city} ({len(zones)*len(timestamps)*4:,} records)")
+    print(f"[OK] Generated data for {city} ({len(zones)*len(timestamps)*4:,} records)")
