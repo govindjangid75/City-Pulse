@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
-from ..database import get_db_connection
+from ..database import get_db_connection, init_db
 from ..models.events import CivicEvent, FeedSourceEnum, SeverityEnum, FeedHealthEnum, FeedHealthStatus
 from ..ws import ws_manager
 
@@ -261,6 +261,7 @@ class IngestionManager:
 
     def reset_database_from_seed(self):
         """Wipe database and re-seed from sample_data JSON files."""
+        init_db()
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM events")
