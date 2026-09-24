@@ -79,3 +79,40 @@ export async function injectCustomEvent(eventPayload) {
   if (!res.ok) throw new Error('Failed to inject custom event')
   return res.json()
 }
+
+export async function loginUser(email, password) {
+  const res = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.detail || 'Authentication failed')
+  return data
+}
+
+export async function signupUser(userData) {
+  const res = await fetch(`${API_BASE}/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData)
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.detail || 'Sign up failed')
+  return data
+}
+
+export async function fetchCurrentUser(token) {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  if (!res.ok) throw new Error('Session invalid or expired')
+  return res.json()
+}
+
+export async function fetchDemoUsers() {
+  const res = await fetch(`${API_BASE}/auth/demo-users`)
+  if (!res.ok) throw new Error('Failed to fetch demo users')
+  return res.json()
+}
+

@@ -26,8 +26,10 @@ from ..services.summary_generator import generate_zone_summary
 from ..services.ingestion import ingestion_manager
 from ..services.normalization import parse_iso_utc, map_severity
 from .websocket import ws_manager
+from .auth import router as auth_router
 
 router = APIRouter()
+router.include_router(auth_router)
 
 def get_reference_datetime(as_of: Optional[str] = None) -> datetime:
     """Determine the reference end-time for the rolling window."""
