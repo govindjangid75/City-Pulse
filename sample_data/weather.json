@@ -1,0 +1,61 @@
+{
+  "source": "weather",
+  "events": [
+    {
+      "id": "wx-0001",
+      "zone": "zone-1",
+      "timestamp": "2026-09-24T08:00:00Z",
+      "type": "clear",
+      "severity": "low",
+      "payload": { "condition": "Clear", "temp_c": 21 }
+    },
+    {
+      "id": "wx-0002",
+      "zone": "zone-2",
+      "timestamp": "2026-09-24T08:15:00Z",
+      "type": "rain_advisory",
+      "severity": "low",
+      "payload": { "condition": "Light rain", "precip_mm_hr": 3 }
+    },
+    {
+      "id": "wx-0003",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T08:30:00Z",
+      "type": "flood_watch",
+      "severity": "medium",
+      "payload": { "condition": "Flood watch issued", "precip_mm_hr": 12 }
+    },
+    {
+      "id": "wx-0004",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:00:00Z",
+      "type": "flood_alert",
+      "severity": "high",
+      "payload": {
+        "condition": "Flash flood alert",
+        "precip_mm_hr": 28,
+        "affected_area": "Underpass at 5th & Main, Zone 3"
+      }
+    },
+    {
+      "id": "wx-0005",
+      "zone": "zone-4",
+      "timestamp": "2026-09-24T09:05:00Z",
+      "type": "wind_advisory",
+      "severity": "low",
+      "payload": { "condition": "Gusty winds", "wind_kph": 42 }
+    },
+    {
+      "id": "wx-0006",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:20:00Z",
+      "type": "flood_alert",
+      "severity": "high",
+      "payload": {
+        "condition": "Flash flood alert - active",
+        "precip_mm_hr": 31,
+        "affected_area": "Underpass at 5th & Main, Zone 3"
+      }
+    }
+  ]
+}

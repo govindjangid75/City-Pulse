@@ -1,0 +1,26 @@
+:root {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --bg-primary: #090d16;
+  --bg-secondary: #0f172a;
+  --bg-card: #1e293b80;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --pulse-calm: #10b981;
+  --pulse-calm-glow: rgba(16, 185, 129, 0.25);
+  --pulse-elevated: #f59e0b;
+  --pulse-elevated-glow: rgba(245, 158, 11, 0.25);
+  --pulse-alert: #ef4444;
+  --pulse-alert-glow: rgba(239, 68, 68, 0.3);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

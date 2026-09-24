@@ -1,0 +1,53 @@
+{
+  "source": "311",
+  "events": [
+    {
+      "id": "inc-0001",
+      "zone": "zone-1",
+      "timestamp": "2026-09-24T08:20:00Z",
+      "type": "noise_complaint",
+      "severity": "low",
+      "payload": { "category": "Noise", "description": "Construction noise before permitted hours" }
+    },
+    {
+      "id": "inc-0002",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:10:00Z",
+      "type": "street_flooding",
+      "severity": "medium",
+      "payload": { "category": "Flooding", "description": "Water pooling at 5th & Main underpass" }
+    },
+    {
+      "id": "inc-0003",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:18:00Z",
+      "type": "street_flooding",
+      "severity": "high",
+      "payload": { "category": "Flooding", "description": "Underpass impassable, vehicle stalled" }
+    },
+    {
+      "id": "inc-0004",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:22:00Z",
+      "type": "power_outage",
+      "severity": "medium",
+      "payload": { "category": "Utilities", "description": "Power flickering near Main St station" }
+    },
+    {
+      "id": "inc-0005",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:30:00Z",
+      "type": "transit_complaint",
+      "severity": "medium",
+      "payload": { "category": "Transit", "description": "No updates posted about Red Line suspension" }
+    },
+    {
+      "id": "inc-0006",
+      "zone": "zone-2",
+      "timestamp": "2026-09-24T08:55:00Z",
+      "type": "pothole",
+      "severity": "low",
+      "payload": { "category": "Roads", "description": "Pothole reported on Elm St" }
+    }
+  ]
+}

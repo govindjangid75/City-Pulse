@@ -1,0 +1,50 @@
+{
+  "source": "transit",
+  "events": [
+    {
+      "id": "tr-0001",
+      "zone": "zone-1",
+      "timestamp": "2026-09-24T08:10:00Z",
+      "type": "on_time",
+      "severity": "low",
+      "payload": { "line": "Blue Line", "delay_min": 0 }
+    },
+    {
+      "id": "tr-0002",
+      "zone": "zone-2",
+      "timestamp": "2026-09-24T08:40:00Z",
+      "type": "minor_delay",
+      "severity": "low",
+      "payload": { "line": "Green Line", "delay_min": 4 }
+    },
+    {
+      "id": "tr-0003",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:05:00Z",
+      "type": "delay",
+      "severity": "medium",
+      "payload": { "line": "Red Line", "delay_min": 12, "cause": "flooded track section" }
+    },
+    {
+      "id": "tr-0004",
+      "zone": "zone-3",
+      "timestamp": "2026-09-24T09:25:00Z",
+      "type": "service_suspended",
+      "severity": "high",
+      "payload": {
+        "line": "Red Line",
+        "delay_min": null,
+        "cause": "flooded underpass at 5th & Main",
+        "note": "Bus bridge activated between Elm St and Main St stations"
+      }
+    },
+    {
+      "id": "tr-0005",
+      "zone": "zone-4",
+      "timestamp": "2026-09-24T09:10:00Z",
+      "type": "minor_delay",
+      "severity": "low",
+      "payload": { "line": "Yellow Line", "delay_min": 3 }
+    }
+  ]
+}
