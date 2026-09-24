@@ -8,7 +8,6 @@ import json
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
-from ..adapters import WeatherAdapter, TransitAdapter, IncidentsAdapter
 from ..database import get_db_connection
 from ..models.events import CivicEvent, FeedSourceEnum, SeverityEnum, FeedHealthEnum, FeedHealthStatus
 from ..ws import ws_manager
@@ -23,9 +22,9 @@ class IngestionManager:
         return cls._instance
 
     def _init_manager(self):
-        self.weather_adapter = WeatherAdapter()
-        self.transit_adapter = TransitAdapter()
-        self.incidents_adapter = IncidentsAdapter()
+        self._weather_adapter = None
+        self._transit_adapter = None
+        self._incidents_adapter = None
         
         # Track feed health telemetry
         now_str = datetime.now(timezone.utc).isoformat()
@@ -34,6 +33,27 @@ class IngestionManager:
             FeedSourceEnum.TRANSIT.value: FeedHealthStatus(status=FeedHealthEnum.OK, last_seen=now_str, event_count_24h=5),
             FeedSourceEnum.INCIDENTS.value: FeedHealthStatus(status=FeedHealthEnum.OK, last_seen=now_str, event_count_24h=6),
         }
+
+    @property
+    def weather_adapter(self):
+        if self._weather_adapter is None:
+            from ..adapters.weather_adapter import WeatherAdapter
+            self._weather_adapter = WeatherAdapter()
+        return self._weather_adapter
+
+    @property
+    def transit_adapter(self):
+        if self._transit_adapter is None:
+            from ..adapters.transit_adapter import TransitAdapter
+            self._transit_adapter = TransitAdapter()
+        return self._transit_adapter
+
+    @property
+    def incidents_adapter(self):
+        if self._incidents_adapter is None:
+            from ..adapters.incidents_adapter import IncidentsAdapter
+            self._incidents_adapter = IncidentsAdapter()
+        return self._incidents_adapter
 
     def get_feed_health(self) -> Dict[str, FeedHealthStatus]:
         """Return snapshot of feed health status."""
@@ -45,10 +65,11 @@ class IngestionManager:
             self.feed_health[feed].status = status
 
     def save_events_to_db(self, events: List[CivicEvent]) -> int:
-        """Write normalized events to SQLite database."""
+        """Write normalized events to SQLite database and mirror to Supabase."""
         if not events:
             return 0
             
+        from ..database import sync_event_to_supabase
         conn = get_db_connection()
         cursor = conn.cursor()
         inserted = 0
@@ -77,6 +98,23 @@ class IngestionManager:
                 
         conn.commit()
         conn.close()
+
+        # Batch mirror to Supabase cloud table for realtime broadcast
+        try:
+            from ..database import sync_events_to_supabase
+            supabase_records = [{
+                "id": e.id,
+                "zone": e.zone,
+                "timestamp": e.timestamp,
+                "source": e.source.value if hasattr(e.source, 'value') else str(e.source),
+                "type": e.type,
+                "severity": e.severity.value if hasattr(e.severity, 'value') else str(e.severity),
+                "payload": e.payload
+            } for e in events]
+            sync_events_to_supabase(supabase_records)
+        except Exception:
+            pass
+
         return inserted
 
     async def run_ingestion_cycle(self) -> int:

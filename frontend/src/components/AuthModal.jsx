@@ -4,6 +4,7 @@ import {
   Building2, Siren, CheckCircle2, AlertCircle, ArrowRight, Sparkles
 } from 'lucide-react'
 import { loginUser, signupUser, fetchDemoUsers } from '../services/api'
+import { isSupabaseConfigured } from '../services/supabase'
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onAuthSuccess }) {
   const [mode, setMode] = useState(initialMode) // 'signin' | 'signup'
@@ -209,6 +210,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onA
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase font-semibold">
                   Civic ID
                 </span>
+                {isSupabaseConfigured() && (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30 flex items-center gap-1 font-semibold">
+                    <Sparkles className="w-2.5 h-2.5 text-sky-400" />
+                    Supabase Auth
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-400">
                 {mode === 'signin' 

@@ -5,6 +5,7 @@ import {
   AlertCircle, Sparkles, Activity, MapPin, Zap
 } from 'lucide-react'
 import { loginUser, signupUser, fetchDemoUsers } from '../services/api'
+import { isSupabaseConfigured } from '../services/supabase'
 
 export default function AuthPage({ onBackToDashboard, onAuthSuccess, initialMode = 'signin' }) {
   const [mode, setMode] = useState(initialMode)

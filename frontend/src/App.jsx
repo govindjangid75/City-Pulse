@@ -14,6 +14,7 @@ import {
   resetSimulationDatabase, fetchHistoryTimeline 
 } from './services/api'
 import { createPulseWebSocket } from './services/websocket'
+import { subscribeToRealtimeEvents } from './services/supabase'
 import { AlertTriangle, Clock, RefreshCw, Layers, ShieldCheck } from 'lucide-react'
 
 export default function App() {
@@ -87,9 +88,17 @@ export default function App() {
       }
     }, 15000)
 
+    // Optional Supabase Postgres Realtime event listener
+    const realtimeChannel = subscribeToRealtimeEvents(() => {
+      if (!replayMode) {
+        loadData()
+      }
+    })
+
     return () => {
       ws.close()
       clearInterval(interval)
+      if (realtimeChannel) realtimeChannel.unsubscribe()
     }
   }, [replayMode, windowMinutes])
 
