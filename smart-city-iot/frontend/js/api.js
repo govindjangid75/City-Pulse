@@ -45,6 +45,35 @@ const API = {
   forecastEnergy:  (z, c) => API.get(`/forecast/energy?zone=${API.enc(z)}&steps=24&city=${API.enc(c)}`),
   anomalies:       (z, c) => API.get(`/forecast/anomalies?zone=${API.enc(z)}&city=${API.enc(c)}`),
 
+  async post(path, body) {
+    const res = await fetch(`${BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
+    return res.json();
+  },
+
   // ── Alerts ────────────────────────────────────────────────────
   alerts:          (c)    => API.get(`/alerts?city=${API.enc(c)}`),
+
+  // ── CityPulse Civic Intelligence Layer ────────────────────────
+  civicHealth:     (c)    => API.get(`/civic-health?city=${API.enc(c)}`),
+  areaCivicHealth: (a, c) => API.get(`/civic-health/${API.enc(a)}?city=${API.enc(c)}`),
+  events:          (c)    => API.get(`/events?city=${API.enc(c)}`),
+  eventDetail:     (id)   => API.get(`/events/${API.enc(id)}`),
+  situationSummary:(c)    => API.get(`/intelligence/summary?city=${API.enc(c)}`),
+  correlations:    (c)    => API.get(`/intelligence/correlations?city=${API.enc(c)}`),
+  reports:         (c)    => API.get(`/reports?city=${API.enc(c)}`),
+  submitReport:    (data) => API.post(`/reports`, data),
+  operations:      (c)    => API.get(`/operations?city=${API.enc(c)}`),
+  operationAction: (data) => API.post(`/operations/action`, data),
+  neighborhoods:   (c)    => API.get(`/neighborhoods?city=${API.enc(c)}`),
+  sourcesHealth:   (c)    => API.get(`/sources/health?city=${API.enc(c)}`),
+  replay:          (id)   => API.get(`/replay/${API.enc(id)}`),
+  askAnalyst:      (q, c) => API.post(`/ai/analyze`, { query: q, city: c }),
+  demoStatus:      ()     => API.get(`/demo/status`),
+  demoToggle:      (act, c)=> API.post(`/demo/toggle`, { active: act, city: c }),
 };
+

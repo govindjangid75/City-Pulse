@@ -102,6 +102,12 @@ CITY_PROFILES = {
     },
 
     # ── INDIA ─────────────────────────────────────────────────────────
+    "Jaipur": {
+        "solar_index": 0.92, "temp_avg_f": 78, "rain_factor": 0.22,
+        "humidity": 0.48, "traffic_density": 1.35, "industrial_aqi": 28,
+        "energy_scale": 1.05, "region": "South Asia", "timezone": "Asia/Kolkata",
+        "zones": ["Mansarovar", "Malviya Nagar", "C-Scheme", "Vaishali Nagar", "Sitapura Industrial"],
+    },
     "Mumbai": {
         "solar_index": 0.80, "temp_avg_f": 81, "rain_factor": 0.75,
         "humidity": 0.80, "traffic_density": 1.80, "industrial_aqi": 35,
@@ -363,6 +369,7 @@ CITY_COORDS = {
     "Phoenix": (33.45, -112.07), "Miami": (25.76, -80.19), "Boston": (42.36, -71.06),
     "Austin": (30.27, -97.74), "Denver": (39.74, -104.99), "Portland": (45.51, -122.68),
     "Atlanta": (33.75, -84.39), "Dallas": (32.78, -96.80), "Toronto": (43.65, -79.38),
+    "Jaipur": (26.9124, 75.7873),
     "Mumbai": (19.08, 72.88), "Delhi": (28.61, 77.21), "Bangalore": (12.97, 77.59),
     "Chennai": (13.08, 80.27), "Hyderabad": (17.39, 78.49), "Kolkata": (22.57, 88.36),
     "Pune": (18.52, 73.86), "Ahmedabad": (23.03, 72.59),
@@ -398,3 +405,73 @@ def find_nearest_city(lat: float, lon: float) -> str:
 
 def get_all_cities() -> list:
     return sorted(CITY_PROFILES.keys())
+
+# Specific real coordinates for top city zones
+SPECIFIC_ZONE_COORDS = {
+    "Jaipur": {
+        "Mansarovar": (26.8530, 75.7667),
+        "Malviya Nagar": (26.8533, 75.8166),
+        "C-Scheme": (26.9100, 75.8020),
+        "Vaishali Nagar": (26.9103, 75.7424),
+        "Sitapura Industrial": (26.7725, 75.8450),
+    },
+    "New York": {
+        "Midtown": (40.7549, -73.9840),
+        "Brooklyn": (40.6782, -73.9442),
+        "Queens": (40.7282, -73.7949),
+        "JFK Airport": (40.6413, -73.7781),
+        "Red Hook Port": (40.6766, -74.0118),
+    },
+    "London": {
+        "City of London": (51.5155, -0.0922),
+        "Hackney": (51.5450, -0.0553),
+        "Chelsea": (51.4875, -0.1687),
+        "Heathrow Airport": (51.4700, -0.4543),
+        "Tilbury Port": (51.4627, 0.3582),
+    },
+    "Bangalore": {
+        "MG Road": (12.9756, 77.6066),
+        "Whitefield": (12.9698, 77.7500),
+        "Koramangala": (12.9352, 77.6245),
+        "Kempegowda Airport": (13.1986, 77.7066),
+        "Peenya Industrial": (13.0285, 77.5186),
+    },
+    "Delhi": {
+        "Connaught Place": (28.6315, 77.2167),
+        "Shahdara": (28.6738, 77.2885),
+        "Dwarka": (28.5921, 77.0460),
+        "IGI Airport": (28.5562, 77.1000),
+        "Tughlakabad Industrial": (28.5135, 77.2796),
+    },
+    "Mumbai": {
+        "Nariman Point": (18.9256, 72.8242),
+        "Dharavi": (19.0400, 72.8550),
+        "Bandra": (19.0596, 72.8295),
+        "CSIA Airport": (19.0896, 72.8656),
+        "Mumbai Port": (18.9480, 72.8510),
+    }
+}
+
+def get_zone_coordinates(city: str, zone: str) -> tuple:
+    """Return (latitude, longitude) for a zone in a city."""
+    if city in SPECIFIC_ZONE_COORDS and zone in SPECIFIC_ZONE_COORDS[city]:
+        return SPECIFIC_ZONE_COORDS[city][zone]
+    
+    # Fallback to city center with slight algorithmic offset for zone index
+    clat, clon = CITY_COORDS.get(city, (40.7128, -74.0060))
+    zones = get_profile(city).get("zones", [])
+    idx = zones.index(zone) if zone in zones else 0
+    # Deterministic offsets in ~3km radius
+    offsets = [
+        (0.015, -0.015),
+        (-0.020, 0.022),
+        (0.005, 0.010),
+        (0.025, 0.030),
+        (-0.030, -0.025),
+    ]
+    olat, olon = offsets[idx % len(offsets)]
+    return round(clat + olat, 5), round(clon + olon, 5)
+
+def get_city_center(city: str) -> tuple:
+    return CITY_COORDS.get(city, (40.7128, -74.0060))
+
