@@ -9,7 +9,43 @@ import secrets
 from datetime import datetime, timezone
 from typing import Generator
 
+from .config import settings
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "citypulse.db")
+
+_supabase_client = None
+
+def get_supabase_client():
+    """Return an active Supabase client instance if configured in .env."""
+    global _supabase_client
+    if _supabase_client is not None:
+        return _supabase_client
+    
+    if settings.SUPABASE_URL and (settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_ANON_KEY):
+        try:
+            from supabase import create_client
+            key = settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_ANON_KEY
+            _supabase_client = create_client(settings.SUPABASE_URL, key)
+            return _supabase_client
+        except Exception as e:
+            print(f"[Supabase] Client initialization notice: {e}")
+            return None
+    return None
+
+def sync_event_to_supabase(event_data: dict):
+    """Mirror a single event to the Supabase cloud table."""
+    sync_events_to_supabase([event_data])
+
+def sync_events_to_supabase(events_list: list):
+    """Batch mirror events to the Supabase cloud table in a single HTTP request."""
+    if not events_list:
+        return
+    client = get_supabase_client()
+    if client:
+        try:
+            client.table("events").upsert(events_list).execute()
+        except Exception as e:
+            pass
 
 def hash_password(password: str, salt: str = None) -> str:
     """Hash a password using PBKDF2-HMAC-SHA256 with a random salt."""

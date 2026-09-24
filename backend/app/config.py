@@ -28,6 +28,17 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_PROVIDER: str = "gemini"
     
+    # Supabase Cloud Configuration
+    SUPABASE_URL: str = ""
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+
+    # Live Telemetry APIs (TomTom & Open-Meteo)
+    TOMTOM_API_KEY: str = ""
+    CITY_LATITUDE: float = 28.5447
+    CITY_LONGITUDE: float = 77.3331
+    CITY_NAME: str = "Delhi NCR (Noida)"
+
     # Security & CORS
     CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "*"]
 

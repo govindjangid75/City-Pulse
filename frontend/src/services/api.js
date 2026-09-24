@@ -80,7 +80,19 @@ export async function injectCustomEvent(eventPayload) {
   return res.json()
 }
 
+import { isSupabaseConfigured, supabaseSignIn, supabaseSignUp, supabaseSignOut } from './supabase'
+
 export async function loginUser(email, password) {
+  // If Supabase credentials are configured in .env, use Supabase Auth
+  if (isSupabaseConfigured()) {
+    try {
+      return await supabaseSignIn({ email, password })
+    } catch (sbErr) {
+      console.warn('[Supabase Auth] Fallback to FastAPI auth:', sbErr.message)
+    }
+  }
+
+  // Fallback to FastAPI backend auth
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -92,6 +104,22 @@ export async function loginUser(email, password) {
 }
 
 export async function signupUser(userData) {
+  // If Supabase credentials are configured in .env, use Supabase Auth
+  if (isSupabaseConfigured()) {
+    try {
+      return await supabaseSignUp({
+        email: userData.email,
+        password: userData.password,
+        fullName: userData.full_name,
+        role: userData.role,
+        primaryZone: userData.primary_zone
+      })
+    } catch (sbErr) {
+      console.warn('[Supabase Auth] Fallback to FastAPI signup:', sbErr.message)
+    }
+  }
+
+  // Fallback to FastAPI backend signup
   const res = await fetch(`${API_BASE}/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -115,4 +143,7 @@ export async function fetchDemoUsers() {
   if (!res.ok) throw new Error('Failed to fetch demo users')
   return res.json()
 }
+
+export { isSupabaseConfigured, supabaseSignOut }
+
 
