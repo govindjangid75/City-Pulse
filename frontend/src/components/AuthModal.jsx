@@ -28,11 +28,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onA
     fetchDemoUsers()
       .then(data => setDemoProfiles(data || []))
       .catch(() => {
-        // Fallback default demo profiles
+        // Fallback default demo profiles (India Edition)
         setDemoProfiles([
-          { email: 'citizen@citypulse.org', password: 'citizen123', full_name: 'Maya Lin', role: 'citizen', title: 'Resident', badge: '👤 Citizen', zone: 'zone-1' },
-          { email: 'analyst@citypulse.gov', password: 'analyst123', full_name: 'David Vance', role: 'analyst', title: 'Urban Planner', badge: '🏛️ Analyst', zone: 'zone-3' },
-          { email: 'ops@citypulse.gov', password: 'dispatch123', full_name: 'Capt. Sarah Chen', role: 'responder', title: 'Emergency Ops', badge: '🚨 Responder', zone: 'zone-2' }
+          { email: 'citizen@citypulse.in', password: 'citizen123', full_name: 'Aarav Sharma', role: 'citizen', title: 'Resident (Noida Sec 62)', badge: '👤 Citizen', zone: 'zone-1' },
+          { email: 'planner@citypulse.gov.in', password: 'analyst123', full_name: 'Dr. Priya Verma', role: 'analyst', title: 'Urban Planner (MCD / DDA)', badge: '🏛️ Analyst', zone: 'zone-3' },
+          { email: 'ops@delhipolice.gov.in', password: 'dispatch123', full_name: 'Insp. Rajesh Kumar', role: 'responder', title: 'Emergency Ops (Traffic)', badge: '🚨 Responder', zone: 'zone-2' }
         ])
       })
   }, [])
@@ -531,10 +531,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onA
                   onChange={(e) => setPrimaryZone(e.target.value)}
                   className="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition"
                 >
-                  <option value="zone-1">Zone 1 — North District (Uptown, Highland Park)</option>
-                  <option value="zone-2">Zone 2 — East Corridor (Riverfront, Tech Quarter)</option>
-                  <option value="zone-3">Zone 3 — Metro Core & Station (Downtown, 5th & Main)</option>
-                  <option value="zone-4">Zone 4 — South Valley (Suburbs, Industrial Park)</option>
+                  <option value="zone-1">Zone 1 — Noida Sector 62 & Yamuna Riverfront</option>
+                  <option value="zone-2">Zone 2 — Connaught Place & Ring Road Arterial</option>
+                  <option value="zone-3">Zone 3 — ITO & Pragati Maidan Core</option>
+                  <option value="zone-4">Zone 4 — Okhla Phase III & Industrial Grid</option>
                 </select>
               </div>
 

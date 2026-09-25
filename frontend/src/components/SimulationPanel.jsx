@@ -135,11 +135,11 @@ export default function SimulationPanel({ onClose, onEventInjected }) {
                   <div className="flex items-center gap-2">
                     <CloudRain className="w-4 h-4 text-sky-400" />
                     <h4 className="text-sm font-bold text-white group-hover:text-red-300 transition">
-                      ⛈️ Severe Storm & Underpass Flood (Zone 3)
+                      ⛈️ Monsoon Cloudburst & Pragati Maidan Underpass Flood (Zone 3)
                     </h4>
                   </div>
                   <p className="text-xs text-slate-400">
-                    Injects flash flood alert, Red Line subway suspension, and multiple citizen street flooding reports. Triggers <strong className="text-red-400 font-mono">ALERT</strong> status & multi-feed cascade correlation.
+                    Injects IMD flash flood alert (58mm/hr), Delhi Metro Blue Line suspension, and MCD 311 citizen street waterlogging reports. Triggers <strong className="text-red-400 font-mono">ALERT</strong> status & multi-feed cascade correlation.
                   </p>
                 </div>
                 <button
@@ -157,11 +157,11 @@ export default function SimulationPanel({ onClose, onEventInjected }) {
                   <div className="flex items-center gap-2">
                     <Train className="w-4 h-4 text-amber-400" />
                     <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
-                      🚦 Rush Hour Transit & Signal Breakdown (Zone 2)
+                      🚦 Peak Ring Road & Connaught Place Gridlock (Zone 2)
                     </h4>
                   </div>
                   <p className="text-xs text-slate-400">
-                    Injects Blue Line 18-minute delay + traffic signal blackout in West Park corridor. Triggers <strong className="text-amber-400 font-mono">ELEVATED</strong> status with transit-incident link.
+                    Injects Delhi Metro Yellow Line 18-minute delay + traffic signal blackout at Vikas Marg / ITO. Triggers <strong className="text-amber-400 font-mono">ELEVATED</strong> status with transit-incident link.
                   </p>
                 </div>
                 <button
@@ -179,11 +179,11 @@ export default function SimulationPanel({ onClose, onEventInjected }) {
                   <div className="flex items-center gap-2">
                     <Flame className="w-4 h-4 text-orange-400" />
                     <h4 className="text-sm font-bold text-white group-hover:text-orange-300 transition">
-                      🔥 Heat Wave & Grid Strain (Zone 4)
+                      🔥 Summer Heatwave & Okhla Grid Strain (Zone 4)
                     </h4>
                   </div>
                   <p className="text-xs text-slate-400">
-                    Injects 41°C extreme heat warning and electrical substation power surge reports in East River Industrial.
+                    Injects IMD 43.5°C extreme heat warning and BSES Yamuna 400kV transformer trip in Okhla Phase III Industrial Grid.
                   </p>
                 </div>
                 <button
@@ -206,10 +206,10 @@ export default function SimulationPanel({ onClose, onEventInjected }) {
                     onChange={(e) => setCustomZone(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white"
                   >
-                    <option value="zone-1">Zone 1 (North Uptown)</option>
-                    <option value="zone-2">Zone 2 (West Park)</option>
-                    <option value="zone-3">Zone 3 (Downtown Core)</option>
-                    <option value="zone-4">Zone 4 (East Industrial)</option>
+                    <option value="zone-1">Zone 1 (Noida Sec 62 & Yamuna)</option>
+                    <option value="zone-2">Zone 2 (Connaught Place & Ring Rd)</option>
+                    <option value="zone-3">Zone 3 (ITO & Pragati Maidan)</option>
+                    <option value="zone-4">Zone 4 (Okhla Industrial Grid)</option>
                   </select>
                 </div>
 
@@ -220,9 +220,9 @@ export default function SimulationPanel({ onClose, onEventInjected }) {
                     onChange={(e) => setCustomSource(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white"
                   >
-                    <option value="311">311 Incident Feed</option>
-                    <option value="weather">Weather Feed</option>
-                    <option value="transit">Transit Authority</option>
+                    <option value="311">MCD 311 Citizen Feed</option>
+                    <option value="weather">IMD Weather Doppler</option>
+                    <option value="transit">DMRC & DTC Transit</option>
                   </select>
                 </div>
 

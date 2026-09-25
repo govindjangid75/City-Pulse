@@ -1,5 +1,7 @@
 {
   "source": "311",
+  "provider": "MCD 311 (Municipal Corporation of Delhi) & Delhi Police PCR",
+  "city": "Delhi NCR",
   "events": [
     {
       "id": "inc-0001",
@@ -7,7 +9,12 @@
       "timestamp": "2026-09-24T08:20:00Z",
       "type": "noise_complaint",
       "severity": "low",
-      "payload": { "category": "Noise", "description": "Construction noise before permitted hours" }
+      "payload": {
+        "category": "Noise & Pollution",
+        "description": "Commercial diesel generator noise near Noida Sector 62 tech park before permitted hours",
+        "ward": "Ward 42 Noida East",
+        "verified": true
+      }
     },
     {
       "id": "inc-0002",
@@ -15,7 +22,12 @@
       "timestamp": "2026-09-24T09:10:00Z",
       "type": "street_flooding",
       "severity": "medium",
-      "payload": { "category": "Flooding", "description": "Water pooling at 5th & Main underpass" }
+      "payload": {
+        "category": "Flooding & Drainage",
+        "description": "Monsoon water pooling at ITO Vikas Marg crossing and Pragati Maidan tunnel entrance",
+        "ward": "Ward 12 ITO Central",
+        "verified": true
+      }
     },
     {
       "id": "inc-0003",
@@ -23,7 +35,13 @@
       "timestamp": "2026-09-24T09:18:00Z",
       "type": "street_flooding",
       "severity": "high",
-      "payload": { "category": "Flooding", "description": "Underpass impassable, vehicle stalled" }
+      "payload": {
+        "category": "Flooding & Drainage",
+        "description": "Pragati Maidan underpass completely flooded (1.2m). Two sedans stranded. NDRF drainage pump requested.",
+        "ward": "Ward 12 ITO Central",
+        "verified": true,
+        "photo_url": "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80"
+      }
     },
     {
       "id": "inc-0004",
@@ -31,7 +49,12 @@
       "timestamp": "2026-09-24T09:22:00Z",
       "type": "power_outage",
       "severity": "medium",
-      "payload": { "category": "Utilities", "description": "Power flickering near Main St station" }
+      "payload": {
+        "category": "BSES Power Utilities",
+        "description": "Power flickering and dead traffic signal at ITO intersection following rain surge",
+        "ward": "Ward 14 Mandi House",
+        "verified": true
+      }
     },
     {
       "id": "inc-0005",
@@ -39,7 +62,12 @@
       "timestamp": "2026-09-24T09:30:00Z",
       "type": "transit_complaint",
       "severity": "medium",
-      "payload": { "category": "Transit", "description": "No updates posted about Red Line suspension" }
+      "payload": {
+        "category": "DMRC Metro Transit",
+        "description": "Heavy crowd congestion at Mandi House Metro station due to Yellow Line delay",
+        "ward": "Ward 12 Central Hub",
+        "verified": true
+      }
     },
     {
       "id": "inc-0006",
@@ -47,7 +75,12 @@
       "timestamp": "2026-09-24T08:55:00Z",
       "type": "pothole",
       "severity": "low",
-      "payload": { "category": "Roads", "description": "Pothole reported on Elm St" }
+      "payload": {
+        "category": "PWD Road Infrastructure",
+        "description": "Pothole reported on Connaught Place Outer Circle near Barakhamba Road",
+        "ward": "Ward 08 New Delhi",
+        "verified": true
+      }
     }
   ]
 }

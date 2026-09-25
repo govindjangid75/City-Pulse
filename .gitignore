@@ -25,12 +25,8 @@ wheels/
 
 # Database
 *.db
-*.sqlite
-*.sqlite3
 *.db-journal
 *.sqlite3-journal
-citypulse.db
-backend/citypulse.db
 
 # Node
 node_modules/
@@ -54,3 +50,4 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+~$*

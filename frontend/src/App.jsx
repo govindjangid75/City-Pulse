@@ -1,29 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Navbar from './components/Navbar'
 import AlertBanner from './components/AlertBanner'
-import ZoneMap from './components/ZoneMap'
-import ZoneCard from './components/ZoneCard'
+import SectorLiveLensBento from './components/bento/SectorLiveLensBento'
+import SchedulingScrubberBento from './components/bento/SchedulingScrubberBento'
+import CivicHealthWalletBento from './components/bento/CivicHealthWalletBento'
+import CitizenInboxBento from './components/bento/CitizenInboxBento'
+import MultiSignalFlowBento from './components/bento/MultiSignalFlowBento'
+import MobileNotificationBento from './components/bento/MobileNotificationBento'
+import InteractiveMapBentoCard from './components/bento/InteractiveMapBentoCard'
+import WeatherRadarBentoCard from './components/bento/WeatherRadarBentoCard'
+import TransitMobilityBentoCard from './components/bento/TransitMobilityBentoCard'
+import CommandDispatchBentoCard from './components/bento/CommandDispatchBentoCard'
+import FeedHealthBentoCard from './components/bento/FeedHealthBentoCard'
+import CitizenReportModal from './components/bento/CitizenReportModal'
+import EvidenceDrawerModal from './components/bento/EvidenceDrawerModal'
+import SectorCameraModal from './components/bento/SectorCameraModal'
+import CivicHealthMethodologyModal from './components/bento/CivicHealthMethodologyModal'
 import ZoneDetailModal from './components/ZoneDetailModal'
-import FeedHealthIndicator from './components/FeedHealthIndicator'
-import HistoricalReplayBar from './components/HistoricalReplayBar'
 import SimulationPanel from './components/SimulationPanel'
 import AuthModal from './components/AuthModal'
 import AuthPage from './components/AuthPage'
+import HomePage from './components/HomePage'
+import AdminPortal from './components/AdminPortal'
+import AllIndiaAlertsHub from './components/AllIndiaAlertsHub'
+import SubscriptionModal from './components/SubscriptionModal'
+import BusinessIntelligenceView from './components/BusinessIntelligenceView'
+import { getActiveSubscription } from './data/subscriptionPlans'
+
 import { 
   fetchAllZones, fetchSystemHealth, toggleFeedStatus, 
   resetSimulationDatabase, fetchHistoryTimeline 
 } from './services/api'
 import { createPulseWebSocket } from './services/websocket'
 import { subscribeToRealtimeEvents } from './services/supabase'
-import { AlertTriangle, Clock, RefreshCw, Layers, ShieldCheck } from 'lucide-react'
+import { Sparkles, Clock, AlertTriangle, ShieldCheck, Layers, Activity, Compass, HeartPulse } from 'lucide-react'
 
 export default function App() {
   const [zones, setZones] = useState([])
   const [selectedZone, setSelectedZone] = useState(null)
+  const [evidenceZone, setEvidenceZone] = useState(null)
+  const [cameraSectorId, setCameraSectorId] = useState(null)
+  const [isMethodologyOpen, setIsMethodologyOpen] = useState(false)
   const [feedHealth, setFeedHealth] = useState({ weather: 'ok', transit: 'ok', '311': 'ok' })
   const [wsStatus, setWsStatus] = useState('connecting')
   const [windowMinutes, setWindowMinutes] = useState(30)
   
+  // Navigation View Tab: 'home' | 'citizen' | 'command' | 'replay'
+  const [activeTab, setActiveTab] = useState('home')
+
   // Authentication State
   const [currentUser, setCurrentUser] = useState(() => {
     try {
@@ -38,19 +62,26 @@ export default function App() {
   const [showFullAuthPage, setShowFullAuthPage] = useState(false)
 
   // Historical Replay State
-  const [replayMode, setReplayMode] = useState(false)
   const [replayTimestamp, setReplayTimestamp] = useState(null)
   const [isPlayingReplay, setIsPlayingReplay] = useState(false)
   const [timeline, setTimeline] = useState([])
 
-  // Simulator Drawer State
+  // Live Geolocation State from Sign Up / Login
+  const [userLiveLocation, setUserLiveLocation] = useState(null)
+  const [showLocationWelcome, setShowLocationWelcome] = useState(false)
+
+  // Modals & Panels State
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false)
+  const [isCitizenReportOpen, setIsCitizenReportOpen] = useState(false)
+  const [reportSectorId, setReportSectorId] = useState('zone-3')
+  const [activeSubscription, setActiveSubscriptionState] = useState(() => getActiveSubscription())
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false)
   const [lastRefreshedAt, setLastRefreshedAt] = useState(new Date())
 
   // Load Zones function
   const loadData = async (asOf = null) => {
     try {
-      const effectiveAsOf = replayMode ? (asOf || replayTimestamp) : null
+      const effectiveAsOf = activeTab === 'replay' ? (asOf || replayTimestamp) : null
       const [zonesData, healthData] = await Promise.all([
         fetchAllZones(windowMinutes, effectiveAsOf),
         fetchSystemHealth()
@@ -71,8 +102,7 @@ export default function App() {
 
     const ws = createPulseWebSocket(
       (msg) => {
-        // Handle incoming real-time messages
-        if (!replayMode) {
+        if (activeTab !== 'replay') {
           loadData()
         }
       },
@@ -81,16 +111,14 @@ export default function App() {
       }
     )
 
-    // Polling backup interval every 15 seconds
     const interval = setInterval(() => {
-      if (!replayMode) {
+      if (activeTab !== 'replay') {
         loadData()
       }
     }, 15000)
 
-    // Optional Supabase Postgres Realtime event listener
     const realtimeChannel = subscribeToRealtimeEvents(() => {
-      if (!replayMode) {
+      if (activeTab !== 'replay') {
         loadData()
       }
     })
@@ -100,11 +128,11 @@ export default function App() {
       clearInterval(interval)
       if (realtimeChannel) realtimeChannel.unsubscribe()
     }
-  }, [replayMode, windowMinutes])
+  }, [activeTab, windowMinutes])
 
   // Replay timeline fetch
   useEffect(() => {
-    if (replayMode) {
+    if (activeTab === 'replay') {
       fetchHistoryTimeline()
         .then(data => {
           if (data && data.length > 0) {
@@ -121,11 +149,11 @@ export default function App() {
       setIsPlayingReplay(false)
       loadData()
     }
-  }, [replayMode])
+  }, [activeTab])
 
   // Replay step animation timer
   useEffect(() => {
-    if (!replayMode || !isPlayingReplay || timeline.length === 0) return
+    if (activeTab !== 'replay' || !isPlayingReplay || timeline.length === 0) return
 
     const timer = setInterval(() => {
       setReplayTimestamp(current => {
@@ -141,7 +169,7 @@ export default function App() {
     }, 2000)
 
     return () => clearInterval(timer)
-  }, [replayMode, isPlayingReplay, timeline])
+  }, [activeTab, isPlayingReplay, timeline])
 
   const handleSelectScrubTimestamp = (ts) => {
     setReplayTimestamp(ts)
@@ -166,181 +194,419 @@ export default function App() {
     }
   }
 
-  // Check if any feed is degraded
+  const scrollToMapSection = () => {
+    const el = document.getElementById('indian-map-section')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  const handleAuthSuccess = (user, token, locationData) => {
+    setCurrentUser(user)
+    setShowFullAuthPage(false)
+    if (locationData) {
+      setUserLiveLocation(locationData)
+      setShowLocationWelcome(true)
+      setTimeout(() => setShowLocationWelcome(false), 6000)
+    }
+  }
+
   const degradedFeeds = Object.entries(feedHealth).filter(([_, status]) => status !== 'ok')
 
-  // Full-page authentication view
+  // Show Sign Up / Login onboarding page only if explicitly triggered from Navbar
   if (showFullAuthPage) {
     return (
       <AuthPage 
         initialMode={authMode}
-        onBackToDashboard={() => setShowFullAuthPage(false)}
-        onAuthSuccess={(user, token) => {
-          setCurrentUser(user)
-          setShowFullAuthPage(false)
-        }}
+        onAuthSuccess={handleAuthSuccess}
+        onCancel={() => setShowFullAuthPage(false)}
       />
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
-      {/* Top Navigation */}
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
+      {/* Top Navbar */}
       <Navbar 
         wsStatus={wsStatus}
-        replayMode={replayMode}
-        onToggleReplay={() => setReplayMode(!replayMode)}
+        replayMode={activeTab === 'replay'}
+        onToggleReplay={() => setActiveTab(activeTab === 'replay' ? 'citizen' : 'replay')}
         onResetDatabase={handleResetDatabase}
         onRefresh={() => loadData()}
         onOpenSimulator={() => setIsSimulatorOpen(true)}
         currentUser={currentUser}
         onOpenAuth={(mode) => {
           setAuthMode(mode)
-          setIsAuthModalOpen(true)
+          setShowFullAuthPage(true)
         }}
         onSignOut={() => {
           localStorage.removeItem('citypulse_token')
           localStorage.removeItem('citypulse_user')
           setCurrentUser(null)
+          setUserLiveLocation(null)
         }}
+        activeTab={activeTab}
+        onSelectTab={(tab) => setActiveTab(tab)}
+        activeSubscription={activeSubscription}
+        onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
       />
 
-      {/* Personalized Welcome Banner if User is Authenticated */}
-      {currentUser && (
-        <div className="bg-gradient-to-r from-emerald-950/40 via-slate-900 to-indigo-950/40 border-b border-slate-800/80 px-4 sm:px-6 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
+      {/* Auto-Detected Live GPS Welcome Banner */}
+      {showLocationWelcome && userLiveLocation && (
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white px-4 sm:px-6 py-2.5 shadow-md animate-in slide-in-from-top duration-300">
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-slate-300">
-                Welcome back, <strong className="text-white font-semibold">{currentUser.full_name}</strong>
-                {currentUser.role === 'responder' && ' • First Responder Priority Dispatch Feed Active'}
-                {currentUser.role === 'analyst' && ' • Municipal Cross-Feed Intelligence Active'}
-                {currentUser.role === 'citizen' && ' • Hyperlocal Resident Watch Active'}
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="font-extrabold tracking-tight">
+                📍 Live GPS Location Locked: {userLiveLocation.lat.toFixed(4)}° N, {userLiveLocation.lng.toFixed(4)}° E
+              </span>
+              <span className="opacity-90 hidden sm:inline">
+                • Nearest Indian Sector: <strong>{userLiveLocation.nearestSector?.name}</strong> ({userLiveLocation.distanceKm} km away)
               </span>
             </div>
-            {currentUser.primary_zone && (
-              <span className="text-emerald-400 font-mono text-[11px] hidden sm:inline bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                Primary Monitored Sector: {currentUser.primary_zone.toUpperCase()}
-              </span>
-            )}
+            <button
+              onClick={scrollToMapSection}
+              className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white font-bold text-[11px] transition"
+            >
+              View on Map ↓
+            </button>
           </div>
         </div>
       )}
 
-      {/* Alert Header */}
+      {/* User Welcome Strip */}
+      {currentUser && (
+        <div className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2 shadow-sm">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-slate-600">
+                Welcome, <strong className="text-slate-900 font-bold">{currentUser.full_name}</strong>
+                {currentUser.role === 'responder' && ' • Emergency Responder Priority Active'}
+                {currentUser.role === 'analyst' && ' • Municipal Cross-Feed Intelligence Active'}
+                {currentUser.role === 'citizen' && ' • Hyperlocal Resident Watch Active'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {userLiveLocation && (
+                <span className="text-blue-800 font-mono text-[11px] hidden sm:inline bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 font-bold">
+                  📍 GPS: {userLiveLocation.lat.toFixed(2)}°, {userLiveLocation.lng.toFixed(2)}°
+                </span>
+              )}
+              {currentUser.primary_zone && (
+                <span className="text-emerald-800 font-mono text-[11px] hidden sm:inline bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
+                  Zone: {currentUser.primary_zone.toUpperCase()}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Alert Ticker */}
       <AlertBanner 
         zones={zones} 
         onSelectZone={(z) => setSelectedZone(z)} 
       />
 
-      {/* Graceful Degradation Notification if any feed is delayed/missing */}
+      {/* Graceful Degradation Notice */}
       {degradedFeeds.length > 0 && (
-        <div className="bg-amber-950/40 border-b border-amber-500/30 px-4 sm:px-6 py-2 text-xs text-amber-300 flex items-center justify-between">
-          <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-4">
+        <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2 text-xs text-amber-900">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-400" />
+              <Clock className="w-4 h-4 text-amber-600" />
               <span>
-                <strong>Feed Latency Notice:</strong>{' '}
-                {degradedFeeds.map(([k, v]) => `${k.toUpperCase()} is currently ${v}`).join(' • ')}.
-                Dashboard synthesizing pulse from remaining live feeds without interruption.
+                <strong>Feed Notice:</strong> {degradedFeeds.map(([k, v]) => `${k.toUpperCase()} is ${v}`).join(' • ')}.
+                Synthesizing multi-signal pulse gracefully without interruption.
               </span>
             </div>
-            <span className="font-mono text-[11px] bg-amber-500/20 px-2 py-0.5 rounded text-amber-200 border border-amber-500/30 hidden sm:inline">
-              Graceful Degradation Active
+            <span className="font-mono text-[10px] bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300 font-bold text-amber-800 hidden sm:inline">
+              Graceful Degradation
             </span>
           </div>
         </div>
       )}
 
-      {/* Main Container */}
+      {/* Main Bento Grid Canvas */}
       <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 space-y-6">
-        {/* Historical Replay Mode Bar */}
-        {replayMode && (
-          <HistoricalReplayBar 
-            currentTimestamp={replayTimestamp}
-            onSelectTimestamp={handleSelectScrubTimestamp}
-            isPlaying={isPlayingReplay}
-            onTogglePlay={() => setIsPlayingReplay(!isPlayingReplay)}
-            onResetToLive={() => {
-              if (timeline.length > 0) {
-                handleSelectScrubTimestamp(timeline[timeline.length - 1])
-              }
+        {/* ========================================================= */}
+        {/* TAB 0: HOME PAGE (Hero Showcase, Quick Jump, Features)    */}
+        {/* ========================================================= */}
+        {activeTab === 'home' && (
+          <HomePage 
+            onNavigateToDashboard={() => setActiveTab('citizen')}
+            onNavigateToAlerts={() => setActiveTab('alerts')}
+            onNavigateToBusiness={() => setActiveTab('business')}
+            onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+            onNavigateToAdmin={() => setActiveTab('admin')}
+            onNavigateToMap={() => {
+              setActiveTab('citizen')
+              setTimeout(scrollToMapSection, 150)
+            }}
+            onNavigateToCommand={() => setActiveTab('command')}
+            onNavigateToReplay={() => setActiveTab('replay')}
+            onOpenCitizenReport={() => setIsCitizenReportOpen(true)}
+            onSelectCity={(cityId, stateName) => {
+              setActiveTab('citizen')
+              setTimeout(scrollToMapSection, 150)
+            }}
+            zones={zones}
+          />
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 0.5: PAN-INDIA REAL-TIME MULTI-DOMAIN ALERTS HUB      */}
+        {/* ========================================================= */}
+        {activeTab === 'alerts' && (
+          <AllIndiaAlertsHub 
+            onSelectCityOnMap={() => {
+              setActiveTab('citizen')
+              setTimeout(scrollToMapSection, 150)
+            }}
+            onNavigateToMap={() => {
+              setActiveTab('citizen')
+              setTimeout(scrollToMapSection, 150)
             }}
           />
         )}
 
-        {/* Hero Section: Spatial Map & Ingestion Health */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <ZoneMap 
-              zones={zones} 
-              onSelectZone={(z) => setSelectedZone(z)}
-              selectedZoneId={selectedZone ? selectedZone.zone : null}
-            />
-          </div>
-          <div>
-            <FeedHealthIndicator 
-              health={feedHealth} 
-              onToggleFeedHealth={handleToggleFeedHealth}
-            />
-          </div>
-        </div>
+        {/* ========================================================= */}
+        {/* TAB 0.8: COMMERCIAL LOGISTICS & BUSINESS PRO INTEL        */}
+        {/* ========================================================= */}
+        {activeTab === 'business' && (
+          <BusinessIntelligenceView 
+            currentTier={activeSubscription?.id || 'business_pro'}
+            onOpenSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+            onNavigateToMap={() => {
+              setActiveTab('citizen')
+              setTimeout(scrollToMapSection, 150)
+            }}
+          />
+        )}
 
-        {/* Section Divider */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800/80">
-          <div>
-            <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-400" />
-              Glanceable Sector Pulse Overview
-            </h2>
-            <p className="text-xs text-slate-400">
-              Plain-language summaries grounded in active 30-minute multi-feed window
-            </p>
-          </div>
+        {/* ========================================================= */}
+        {/* TAB 1: CITIZEN BENTO EXPERIENCE (Live Dashboard)          */}
+        {/* ========================================================= */}
+        {activeTab === 'citizen' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Bento Row 1: Sector Lens (5 cols) + Timeline Scrubber (7 cols) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-5">
+                <SectorLiveLensBento 
+                  zones={zones} 
+                  onSelectZone={(z) => setSelectedZone(z)}
+                  selectedZoneId={selectedZone?.zone}
+                  onOpenSectorCamera={(secId) => setCameraSectorId(secId)}
+                  onOpenReportModal={(secId) => {
+                    setReportSectorId(secId || 'zone-3')
+                    setIsCitizenReportOpen(true)
+                  }}
+                  onScrollToMap={scrollToMapSection}
+                  onTriggerGps={scrollToMapSection}
+                />
+              </div>
+              <div className="lg:col-span-7">
+                <SchedulingScrubberBento 
+                  timeline={timeline}
+                  currentTimestamp={replayTimestamp}
+                  isPlaying={isPlayingReplay}
+                  onTogglePlay={() => setIsPlayingReplay(!isPlayingReplay)}
+                  onSelectTimestamp={handleSelectScrubTimestamp}
+                  onScenarioTriggered={() => loadData()}
+                />
+              </div>
+            </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Updated: {lastRefreshedAt.toLocaleTimeString()}</span>
-          </div>
-        </div>
+            {/* Bento Row 2: 3-Pillar Pulse Trio (Health Wallet + Citizen Inbox + Mobile Alert) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <CivicHealthWalletBento 
+                zones={zones} 
+                onOpenDiagnostics={() => setIsMethodologyOpen(true)}
+              />
+              <CitizenInboxBento 
+                onOpenReportModal={() => setIsCitizenReportOpen(true)}
+                onSelectReport={(rep) => {
+                  const matchedZone = zones.find(z => z.zone === rep.zone)
+                  if (matchedZone) setSelectedZone(matchedZone)
+                }}
+              />
+              <MobileNotificationBento 
+                zones={zones} 
+                onOpenCommandCenter={() => setActiveTab('command')}
+              />
+            </div>
 
-        {/* 4-Zone Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {zones.map(zone => (
-            <ZoneCard 
-              key={zone.zone} 
-              zone={zone} 
-              onClick={() => setSelectedZone(zone)} 
+            {/* Bento Row 3: Multi-Signal Fusion Full-Width Matrix */}
+            <div>
+              <MultiSignalFlowBento 
+                zones={zones} 
+                onOpenEvidence={(z) => setEvidenceZone(z)}
+              />
+            </div>
+
+            {/* Bento Row 4: Full-Width Indian Spatial Map & Real-Time Telemetry Hub */}
+            <div id="indian-map-section" className="scroll-mt-20">
+              <InteractiveMapBentoCard 
+                zones={zones}
+                onSelectZone={(z) => setSelectedZone(z)}
+                selectedZoneId={selectedZone?.zone}
+                initialUserLocation={userLiveLocation}
+                onOpenAlertsView={() => setActiveTab('alerts')}
+              />
+            </div>
+
+            {/* Bento Row 5: Transit Pulse & Weather Doppler Duo */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-8">
+                <TransitMobilityBentoCard zones={zones} />
+              </div>
+              <div className="lg:col-span-4">
+                <WeatherRadarBentoCard zones={zones} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 1.5: ADMIN 311 PORTAL & 24-HOUR SLA GOVERNANCE        */}
+        {/* ========================================================= */}
+        {activeTab === 'admin' && (
+          <AdminPortal 
+            zones={zones} 
+            onRefreshData={() => loadData()} 
+          />
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 2: OFFICIAL COMMAND CENTER                            */}
+        {/* ========================================================= */}
+        {activeTab === 'command' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-6">
+                <CommandDispatchBentoCard zones={zones} />
+              </div>
+              <div className="lg:col-span-6">
+                <MultiSignalFlowBento 
+                  zones={zones} 
+                  onOpenEvidence={(z) => setEvidenceZone(z)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-8">
+                <InteractiveMapBentoCard 
+                  zones={zones}
+                  onSelectZone={(z) => setSelectedZone(z)}
+                  selectedZoneId={selectedZone?.zone}
+                  initialUserLocation={userLiveLocation}
+                />
+              </div>
+              <div className="lg:col-span-4">
+                <FeedHealthBentoCard 
+                  health={feedHealth} 
+                  onToggleFeedHealth={handleToggleFeedHealth}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* TAB 3: HISTORICAL REPLAY STUDIO                          */}
+        {/* ========================================================= */}
+        {activeTab === 'replay' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <SchedulingScrubberBento 
+              timeline={timeline}
+              currentTimestamp={replayTimestamp}
+              isPlaying={isPlayingReplay}
+              onTogglePlay={() => setIsPlayingReplay(!isPlayingReplay)}
+              onSelectTimestamp={handleSelectScrubTimestamp}
+              onScenarioTriggered={() => loadData()}
             />
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="lg:col-span-8">
+                <InteractiveMapBentoCard 
+                  zones={zones}
+                  onSelectZone={(z) => setSelectedZone(z)}
+                  selectedZoneId={selectedZone?.zone}
+                  initialUserLocation={userLiveLocation}
+                />
+              </div>
+              <div className="lg:col-span-4">
+                <SectorLiveLensBento 
+                  zones={zones} 
+                  onSelectZone={(z) => setSelectedZone(z)}
+                  selectedZoneId={selectedZone?.zone}
+                  onOpenSectorCamera={(secId) => setCameraSectorId(secId)}
+                  onScrollToMap={scrollToMapSection}
+                  onTriggerGps={scrollToMapSection}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/80 py-4 px-6 text-xs text-slate-500">
+      <footer className="border-t border-slate-200/80 bg-white py-5 px-6 text-xs text-slate-500 shadow-sm mt-8">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400">CityPulse</span>
-            <span>— AmiHacks Track B (Industry / Open Innovation)</span>
+            <span className="font-extrabold text-slate-800">CityPulse</span>
+            <span>— AmiHacks Track B: The Live Civic Health Dashboard</span>
           </div>
-          <div className="flex items-center gap-3 font-mono text-[11px]">
-            <span>Constraint: "Possible Link" (No Unchecked Causation)</span>
+          <div className="flex items-center gap-4 font-mono text-[11px]">
+            <span className="text-slate-600">Constraint: "Possible Link" (No Unchecked Causation)</span>
             <span>•</span>
-            <span className="text-emerald-400">Production Ready</span>
+            <span className="text-emerald-700 font-bold">Bento Grid UI v2.5</span>
           </div>
         </div>
       </footer>
 
-      {/* Zone Detail Modal */}
+      {/* Modals */}
+      {/* 1. Sector Camera Stream Modal */}
+      <SectorCameraModal 
+        isOpen={Boolean(cameraSectorId)}
+        sectorId={cameraSectorId || 'zone-3'}
+        onClose={() => setCameraSectorId(null)}
+      />
+
+      {/* 2. Civic Health Methodology Modal */}
+      <CivicHealthMethodologyModal 
+        isOpen={isMethodologyOpen}
+        zones={zones}
+        onClose={() => setIsMethodologyOpen(false)}
+      />
+
+      {/* 3. Citizen Photo Report Modal */}
+      <CitizenReportModal 
+        isOpen={isCitizenReportOpen}
+        initialSectorId={reportSectorId}
+        onClose={() => setIsCitizenReportOpen(false)}
+        onEventSubmitted={() => loadData()}
+      />
+
+      {/* 4. Evidence Audit Drawer Modal */}
+      <EvidenceDrawerModal 
+        zone={evidenceZone}
+        isOpen={Boolean(evidenceZone)}
+        onClose={() => setEvidenceZone(null)}
+        asOf={activeTab === 'replay' ? replayTimestamp : null}
+      />
+
+      {/* 5. Sector Detail Diagnostics Modal */}
       {selectedZone && (
         <ZoneDetailModal 
           zone={selectedZone} 
-          asOf={replayMode ? replayTimestamp : null}
+          asOf={activeTab === 'replay' ? replayTimestamp : null}
           onClose={() => setSelectedZone(null)} 
         />
       )}
 
-      {/* Demo Simulator Drawer / Modal */}
+      {/* 6. Demo Scenarios Drawer */}
       {isSimulatorOpen && (
         <SimulationPanel 
           onClose={() => setIsSimulatorOpen(false)}
@@ -348,7 +614,7 @@ export default function App() {
         />
       )}
 
-      {/* Auth Modal (Sign In & Sign Up) */}
+      {/* 7. User Auth Modal */}
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -356,6 +622,18 @@ export default function App() {
         onAuthSuccess={(user, token) => {
           setCurrentUser(user)
           setIsAuthModalOpen(false)
+        }}
+      />
+
+      {/* 8. Commercial & Resident Tiered Subscriptions Modal */}
+      <SubscriptionModal 
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        activeTier={activeSubscription?.id || 'free'}
+        onSubscriptionUpdated={(updated) => setActiveSubscriptionState(updated)}
+        onNavigateToBusinessView={() => {
+          setIsSubscriptionModalOpen(false)
+          setActiveTab('business')
         }}
       />
     </div>

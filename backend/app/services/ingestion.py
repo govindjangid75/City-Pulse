@@ -8,7 +8,7 @@ import json
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
-from ..database import get_db_connection, init_db
+from ..database import get_db_connection
 from ..models.events import CivicEvent, FeedSourceEnum, SeverityEnum, FeedHealthEnum, FeedHealthStatus
 from ..ws import ws_manager
 
@@ -173,7 +173,7 @@ class IngestionManager:
                     source=FeedSourceEnum.WEATHER,
                     type="flood_alert",
                     severity=SeverityEnum.HIGH,
-                    payload={"condition": "Flash flood warning - 35mm/hr torrential rain", "affected_area": f"Low-lying Underpass, {zone}"}
+                    payload={"condition": "IMD Red Alert: 58mm/hr Monsoon Cloudburst", "affected_area": f"ITO & Pragati Maidan Underpass, {zone}"}
                 ),
                 CivicEvent(
                     id=f"tr-{uuid.uuid4().hex[:6]}",
@@ -182,7 +182,7 @@ class IngestionManager:
                     source=FeedSourceEnum.TRANSIT,
                     type="service_suspended",
                     severity=SeverityEnum.HIGH,
-                    payload={"line": "Red Line Metro", "cause": "Flooded track section at 5th & Main", "bus_bridge": "Active"}
+                    payload={"line": "Delhi Metro Blue Line", "cause": "Flooded track switch & underpass at Pragati Maidan", "bus_bridge": "DTC Electric Shuttle Active"}
                 ),
                 CivicEvent(
                     id=f"inc-{uuid.uuid4().hex[:6]}",
@@ -191,7 +191,7 @@ class IngestionManager:
                     source=FeedSourceEnum.INCIDENTS,
                     type="street_flooding",
                     severity=SeverityEnum.HIGH,
-                    payload={"category": "Flooding", "description": "Vehicles stranded at underpass with 3ft standing water"}
+                    payload={"category": "Flooding", "description": "Vehicles stranded at Pragati Maidan tunnel with 1.2m standing water"}
                 ),
                 CivicEvent(
                     id=f"inc-{uuid.uuid4().hex[:6]}",
@@ -200,7 +200,37 @@ class IngestionManager:
                     source=FeedSourceEnum.INCIDENTS,
                     type="power_outage",
                     severity=SeverityEnum.MEDIUM,
-                    payload={"category": "Utilities", "description": "Substation water ingress causing localized flickering"}
+                    payload={"category": "Utilities", "description": "BSES Yamuna substation water ingress causing localized power outage"}
+                )
+            ]
+        elif scenario_name == "power_outage":
+            events = [
+                CivicEvent(
+                    id=f"inc-{uuid.uuid4().hex[:6]}",
+                    zone="zone-4",
+                    timestamp=t_minus_15,
+                    source=FeedSourceEnum.INCIDENTS,
+                    type="power_outage",
+                    severity=SeverityEnum.HIGH,
+                    payload={"category": "Utilities", "description": "BSES / Tata Power 400kV transformer trip in Okhla Phase 3 Industrial Grid"}
+                ),
+                CivicEvent(
+                    id=f"tr-{uuid.uuid4().hex[:6]}",
+                    zone="zone-4",
+                    timestamp=t_minus_10,
+                    source=FeedSourceEnum.TRANSIT,
+                    type="major_delay",
+                    severity=SeverityEnum.MEDIUM,
+                    payload={"line": "Mathura Road Arterial", "delay_min": 24, "cause": "Dark traffic signals at Okhla crossing"}
+                ),
+                CivicEvent(
+                    id=f"inc-{uuid.uuid4().hex[:6]}",
+                    zone="zone-4",
+                    timestamp=now_iso,
+                    source=FeedSourceEnum.INCIDENTS,
+                    type="grid_stress",
+                    severity=SeverityEnum.HIGH,
+                    payload={"category": "Utilities", "description": "14 Industrial manufacturing units switched to backup diesel generators"}
                 )
             ]
         elif scenario_name == "rush_hour_congestion":
@@ -212,7 +242,7 @@ class IngestionManager:
                     source=FeedSourceEnum.TRANSIT,
                     type="major_delay",
                     severity=SeverityEnum.MEDIUM,
-                    payload={"line": "Blue Line", "delay_min": 18, "cause": "Signal timing malfunction"}
+                    payload={"line": "Delhi Metro Yellow Line", "delay_min": 18, "cause": "Signal timing malfunction at Rajiv Chowk Interchange"}
                 ),
                 CivicEvent(
                     id=f"inc-{uuid.uuid4().hex[:6]}",
@@ -221,7 +251,7 @@ class IngestionManager:
                     source=FeedSourceEnum.INCIDENTS,
                     type="traffic_signal_down",
                     severity=SeverityEnum.MEDIUM,
-                    payload={"category": "Traffic", "description": "Intersection signals flashing red on Grand Ave"}
+                    payload={"category": "Traffic", "description": "Intersection signals flashing dark on Vikas Marg / ITO Crossing"}
                 ),
                 CivicEvent(
                     id=f"inc-{uuid.uuid4().hex[:6]}",
@@ -230,7 +260,7 @@ class IngestionManager:
                     source=FeedSourceEnum.INCIDENTS,
                     type="transit_complaint",
                     severity=SeverityEnum.LOW,
-                    payload={"category": "Transit", "description": "Overcrowded platform at Central Station"}
+                    payload={"category": "Transit", "description": "Overcrowded platform at Kashmere Gate Metro Interchange"}
                 )
             ]
         elif scenario_name == "heat_wave":
@@ -242,7 +272,7 @@ class IngestionManager:
                     source=FeedSourceEnum.WEATHER,
                     type="excessive_heat_advisory",
                     severity=SeverityEnum.MEDIUM,
-                    payload={"condition": "Extreme Heat Advisory 41°C / 106°F", "precip_mm_hr": 0}
+                    payload={"condition": "IMD Extreme Heatwave Advisory 43.5°C (Safdarjung Observatory)", "precip_mm_hr": 0}
                 ),
                 CivicEvent(
                     id=f"inc-{uuid.uuid4().hex[:6]}",
@@ -251,7 +281,7 @@ class IngestionManager:
                     source=FeedSourceEnum.INCIDENTS,
                     type="grid_stress",
                     severity=SeverityEnum.MEDIUM,
-                    payload={"category": "Utilities", "description": "AC power surge causing transformer tripping"}
+                    payload={"category": "Utilities", "description": "Peak AC load causing transformer tripping in Noida Sector 62"}
                 )
             ]
 
@@ -261,7 +291,6 @@ class IngestionManager:
 
     def reset_database_from_seed(self):
         """Wipe database and re-seed from sample_data JSON files."""
-        init_db()
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM events")

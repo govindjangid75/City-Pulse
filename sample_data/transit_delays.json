@@ -1,5 +1,7 @@
 {
   "source": "transit",
+  "provider": "DMRC (Delhi Metro Rail Corporation) & Delhi Traffic Police",
+  "city": "Delhi NCR",
   "events": [
     {
       "id": "tr-0001",
@@ -7,7 +9,12 @@
       "timestamp": "2026-09-24T08:10:00Z",
       "type": "on_time",
       "severity": "low",
-      "payload": { "line": "Blue Line", "delay_min": 0 }
+      "payload": {
+        "line": "Delhi Metro Blue Line (Noida Sec 62 -> Dwarka)",
+        "delay_min": 0,
+        "status": "Normal Schedule (48 km/h)",
+        "agency": "DMRC"
+      }
     },
     {
       "id": "tr-0002",
@@ -15,7 +22,12 @@
       "timestamp": "2026-09-24T08:40:00Z",
       "type": "minor_delay",
       "severity": "low",
-      "payload": { "line": "Green Line", "delay_min": 4 }
+      "payload": {
+        "line": "DTC Electric AC Bus Route 505 (Ring Road Express)",
+        "delay_min": 6,
+        "cause": "Traffic congestion near Barakhamba Road intersection",
+        "agency": "DTC"
+      }
     },
     {
       "id": "tr-0003",
@@ -23,7 +35,12 @@
       "timestamp": "2026-09-24T09:05:00Z",
       "type": "delay",
       "severity": "medium",
-      "payload": { "line": "Red Line", "delay_min": 12, "cause": "flooded track section" }
+      "payload": {
+        "line": "Delhi Metro Yellow Line (Samaypur Badli -> Millennium City)",
+        "delay_min": 18,
+        "cause": "Water accumulation on track switch near Pragati Maidan tunnel",
+        "agency": "DMRC"
+      }
     },
     {
       "id": "tr-0004",
@@ -32,10 +49,11 @@
       "type": "service_suspended",
       "severity": "high",
       "payload": {
-        "line": "Red Line",
+        "line": "Delhi Metro & Pragati Maidan Underpass Arterial",
         "delay_min": null,
-        "cause": "flooded underpass at 5th & Main",
-        "note": "Bus bridge activated between Elm St and Main St stations"
+        "cause": "Flooded road underpass (1.2m water level). Traffic diverted via Ring Road.",
+        "note": "Special feeder buses deployed between Mandi House and ITO stations",
+        "agency": "Delhi Traffic Police & DMRC"
       }
     },
     {
@@ -44,7 +62,12 @@
       "timestamp": "2026-09-24T09:10:00Z",
       "type": "minor_delay",
       "severity": "low",
-      "payload": { "line": "Yellow Line", "delay_min": 3 }
+      "payload": {
+        "line": "Delhi Metro Magenta Line (Botanical Garden -> Okhla)",
+        "delay_min": 4,
+        "cause": "Minor signal check near Okhla Phase 3 station",
+        "agency": "DMRC"
+      }
     }
   ]
 }

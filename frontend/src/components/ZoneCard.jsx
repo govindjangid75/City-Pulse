@@ -2,10 +2,10 @@ import React from 'react'
 import { Sparkles, ArrowRight, ShieldCheck, AlertTriangle, Info, Clock } from 'lucide-react'
 
 const ZONE_SUBTITLES = {
-  'zone-1': 'North Uptown / Harbor',
-  'zone-2': 'West Park Transit Corridor',
-  'zone-3': 'Downtown Core (5th & Main)',
-  'zone-4': 'East River Industrial'
+  'zone-1': 'Noida Sector 62 & Yamuna Riverfront',
+  'zone-2': 'Connaught Place & Ring Road Corridor',
+  'zone-3': 'ITO & Pragati Maidan Core',
+  'zone-4': 'Okhla Industrial Area Grid'
 }
 
 export default function ZoneCard({ zone, onClick }) {

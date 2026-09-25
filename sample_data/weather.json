@@ -1,5 +1,7 @@
 {
   "source": "weather",
+  "provider": "IMD (India Meteorological Department) Doppler Radar",
+  "city": "Delhi NCR",
   "events": [
     {
       "id": "wx-0001",
@@ -7,7 +9,13 @@
       "timestamp": "2026-09-24T08:00:00Z",
       "type": "clear",
       "severity": "low",
-      "payload": { "condition": "Clear", "temp_c": 21 }
+      "payload": {
+        "condition": "Pleasant & Clear (Yamuna Basin)",
+        "temp_c": 28,
+        "humidity": 62,
+        "wind_kmh": 14,
+        "observatory": "IMD Noida Sec 62 AWS"
+      }
     },
     {
       "id": "wx-0002",
@@ -15,7 +23,12 @@
       "timestamp": "2026-09-24T08:15:00Z",
       "type": "rain_advisory",
       "severity": "low",
-      "payload": { "condition": "Light rain", "precip_mm_hr": 3 }
+      "payload": {
+        "condition": "Monsoon Drizzle & Overcast",
+        "precip_mm_hr": 4,
+        "affected_area": "Connaught Place & Central Ring Road",
+        "observatory": "IMD Safdarjung Observatory"
+      }
     },
     {
       "id": "wx-0003",
@@ -23,7 +36,12 @@
       "timestamp": "2026-09-24T08:30:00Z",
       "type": "flood_watch",
       "severity": "medium",
-      "payload": { "condition": "Flood watch issued", "precip_mm_hr": 12 }
+      "payload": {
+        "condition": "Monsoon Cloudburst Warning (Orange Alert)",
+        "precip_mm_hr": 24,
+        "affected_area": "ITO & Pragati Maidan Underpass Corridor",
+        "observatory": "IMD Palam Radar"
+      }
     },
     {
       "id": "wx-0004",
@@ -32,9 +50,11 @@
       "type": "flood_alert",
       "severity": "high",
       "payload": {
-        "condition": "Flash flood alert",
-        "precip_mm_hr": 28,
-        "affected_area": "Underpass at 5th & Main, Zone 3"
+        "condition": "Heavy Cloudburst Surge (Red Alert)",
+        "precip_mm_hr": 58,
+        "affected_area": "Pragati Maidan Tunnel & Vikas Marg Low-Lying Zone",
+        "water_depth_cm": 120,
+        "observatory": "IMD Doppler Radar Delhi"
       }
     },
     {
@@ -43,7 +63,12 @@
       "timestamp": "2026-09-24T09:05:00Z",
       "type": "wind_advisory",
       "severity": "low",
-      "payload": { "condition": "Gusty winds", "wind_kph": 42 }
+      "payload": {
+        "condition": "Squall & High Dust Winds",
+        "wind_kmh": 48,
+        "affected_area": "Okhla Industrial Area Phase III",
+        "observatory": "IMD Ayanagar AWS"
+      }
     },
     {
       "id": "wx-0006",
@@ -52,9 +77,10 @@
       "type": "flood_alert",
       "severity": "high",
       "payload": {
-        "condition": "Flash flood alert - active",
-        "precip_mm_hr": 31,
-        "affected_area": "Underpass at 5th & Main, Zone 3"
+        "condition": "Severe Monsoon Waterlogging Active",
+        "precip_mm_hr": 64,
+        "affected_area": "ITO Crossing & Minto Bridge Underpass",
+        "observatory": "Delhi Disaster Management Authority (DDMA)"
       }
     }
   ]

@@ -3,28 +3,28 @@ import { MapPin, CloudRain, Train, AlertCircle, Sparkles, Navigation, Layers } f
 
 const ZONE_METADATA = {
   'zone-1': {
-    name: 'North Uptown & Harbor',
-    district: 'Residential & Marina',
+    name: 'North Uptown & Yamuna Riverfront',
+    district: 'Noida Sector 62 / Mayur Vihar Bayside',
     code: 'SEC-01',
-    coords: '40.7589° N, 73.9851° W'
+    coords: '28.6280° N, 77.3649° E'
   },
   'zone-2': {
-    name: 'West Park Corridor',
-    district: 'Arterial Transit & Commercial',
+    name: 'West Park Transit Corridor',
+    district: 'Connaught Place & Ring Road Arterial',
     code: 'SEC-02',
-    coords: '40.7505° N, 73.9934° W'
+    coords: '28.6315° N, 77.2167° E'
   },
   'zone-3': {
     name: 'Downtown Civic Core',
-    district: '5th & Main Underpass / Hub',
+    district: 'ITO & Pragati Maidan Underpass',
     code: 'SEC-03',
-    coords: '40.7418° N, 73.9893° W'
+    coords: '28.6248° N, 77.2435° E'
   },
   'zone-4': {
-    name: 'East River Industrial',
-    district: 'Logistics & Waterfront',
+    name: 'East River Industrial Grid',
+    district: 'Okhla Phase III & Patparganj Logistics',
     code: 'SEC-04',
-    coords: '40.7350° N, 73.9780° W'
+    coords: '28.5355° N, 77.2715° E'
   }
 }
 

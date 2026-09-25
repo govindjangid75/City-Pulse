@@ -16,7 +16,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Body
 from ..config import settings
-from ..database import get_db_connection, init_db
+from ..database import get_db_connection
 from ..models.events import (
     CivicEvent, ZoneStatus, ZoneStatusEnum, FeedSourceEnum, 
     SeverityEnum, FeedHealthEnum, FeedHealthStatus, CorrelationFlag
@@ -40,14 +40,10 @@ def get_reference_datetime(as_of: Optional[str] = None) -> datetime:
             pass
             
     # Check max timestamp in DB
-    init_db()
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT MAX(timestamp) as max_ts FROM events")
-        row = cursor.fetchone()
-    except Exception:
-        row = None
+    cursor.execute("SELECT MAX(timestamp) as max_ts FROM events")
+    row = cursor.fetchone()
     conn.close()
     
     if row and row["max_ts"]:
